@@ -1,0 +1,61 @@
+services:
+  - type: web
+    name: online-tracker-web
+    runtime: node
+    plan: free
+    buildCommand: cd web-ui && npm install
+    startCommand: node web-ui/src/server.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "3000"
+      - key: ENABLE_LIVE_SOURCES
+        value: "true"
+      - key: HTTP_TIMEOUT_MS
+        value: "8000"
+      - key: TRACKER_AUTOSTART
+        value: "true"
+      - key: TRACKER_WORLDS
+        value: "Nefera"
+      - key: TRACKER_POLL_INTERVAL_MS
+        value: "30000"
+      - key: TRACKER_TRANSITION_WINDOW_SECONDS
+        value: "120"
+      - key: TRACKER_MIN_TRANSITION_PAIRS
+        value: "2"
+      - key: TIBIADATA_API_BASE
+        value: "https://api.tibiadata.com/v4"
+      - key: TIBIA_LATESTNEWS_URL
+        value: "https://www.tibia.com/news/?subtopic=latestnews"
+      - key: EXEVOPAN_URL
+        value: "https://www.exevopan.com/"
+      - key: TIBIAVIP_CHARACTER_URL_TEMPLATE
+        value: "https://tibiavip.app/characters?status=2&name={name}&vocation=&levelMin=&levelMax=&world="
+      - key: GUILDSTATS_CHARACTER_URL_TEMPLATE
+        value: "https://guildstats.eu/character?nick={name}"
+      - key: TIBIA_CHARACTER_URL_TEMPLATE
+        value: "https://www.tibia.com/community/?subtopic=characters&name={name}"
+      - key: GUILDSTATS_EXP_URL_TEMPLATE
+        value: "https://guildstats.eu/character?nick={name}&tab=9"
+
+  - type: worker
+    name: online-tracker-bot
+    runtime: node
+    plan: free
+    buildCommand: cd web-ui && npm install
+    startCommand: node web-ui/bot/discord-bot.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: API_BASE_URL
+        fromService:
+          type: web
+          name: online-tracker-web
+          property: url
+      - key: BOT_REQUEST_TIMEOUT_MS
+        value: "20000"
+      - key: EMBED_THUMBNAIL_URL
+        value: "https://via.placeholder.com/192x192.png?text=Tibia"
+      - key: EMBED_BANNER_URL
+        value: "https://via.placeholder.com/800x200.png?text=Alt+Tracker"

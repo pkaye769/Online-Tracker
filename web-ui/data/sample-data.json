@@ -1,0 +1,62 @@
+﻿[
+  {
+    "name": "Shadow Mancer",
+    "world": "Nefera",
+    "vocation": "Master Sorcerer",
+    "level": 610,
+    "guild": "Ashes and Alliance",
+    "lastLogin": "2026-02-20T23:11:00Z",
+    "loginPattern": ["22:58", "23:04", "23:08"],
+    "tradeEvents": [
+      { "date": "2025-11-04", "type": "bazaar_sold", "source": "exevopan" }
+    ],
+    "transferEvents": [
+      { "date": "2025-11-06", "from": "Harmonia", "to": "Nefera", "source": "guildstats.eu" }
+    ]
+  },
+  {
+    "name": "Holy Prism",
+    "world": "Nefera",
+    "vocation": "Elder Druid",
+    "level": 588,
+    "guild": "Ashes and Alliance",
+    "lastLogin": "2026-02-20T23:09:00Z",
+    "loginPattern": ["23:01", "23:06", "23:12"],
+    "tradeEvents": [
+      { "date": "2025-10-29", "type": "bazaar_sold", "source": "tibiadata" }
+    ],
+    "transferEvents": [
+      { "date": "2025-11-06", "from": "Harmonia", "to": "Nefera", "source": "guildstats.eu" }
+    ]
+  },
+  {
+    "name": "Knight Archive",
+    "world": "Nefera",
+    "vocation": "Elite Knight",
+    "level": 603,
+    "guild": "Northern Lights",
+    "lastLogin": "2026-02-20T18:40:00Z",
+    "loginPattern": ["18:32", "18:39", "18:42"],
+    "tradeEvents": [
+      { "date": "2025-07-12", "type": "bazaar_sold", "source": "tibia.com" }
+    ],
+    "transferEvents": [
+      { "date": "2025-07-16", "from": "Antica", "to": "Nefera", "source": "guildstats.eu" }
+    ]
+  },
+  {
+    "name": "Rogue Lantern",
+    "world": "Nefera",
+    "vocation": "Royal Paladin",
+    "level": 571,
+    "guild": "Ashes and Alliance",
+    "lastLogin": "2026-02-20T23:05:00Z",
+    "loginPattern": ["22:54", "23:02", "23:07"],
+    "tradeEvents": [
+      { "date": "2025-11-03", "type": "bazaar_sold", "source": "exevopan" }
+    ],
+    "transferEvents": [
+      { "date": "2025-11-06", "from": "Harmonia", "to": "Nefera", "source": "guildstats.eu" }
+    ]
+  }
+]

@@ -1,0 +1,68 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tibia Alt Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">Tibia Intelligence Console</p>
+        <h1>Alt and Trade Tracker</h1>
+        <p>Search hidden alt patterns, guild rosters, and last traded transfers from one panel.</p>
+      </header>
+
+      <section class="panel">
+        <div class="search-row">
+          <label for="mode">Search Type</label>
+          <select id="mode">
+            <option value="alt">/alt</option>
+            <option value="alt-strict">/alt-strict</option>
+            <option value="alt-relaxed">/alt-relaxed</option>
+            <option value="guild">/guild</option>
+            <option value="traded">/traded-when</option>
+          </select>
+        </div>
+
+        <div class="search-row">
+          <label for="query">Query</label>
+          <input id="query" type="text" placeholder="Character or guild name" />
+        </div>
+
+        <button id="searchBtn">Search</button>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Source Status</h2>
+          <button id="sourcesRefresh" class="btn-ghost">Refresh</button>
+        </div>
+        <div class="panel-head">
+          <h2>Tracker Control</h2>
+          <div class="tracker-actions">
+            <button id="trackerStartBtn" class="btn-ghost">Start Tracker</button>
+            <button id="trackerStopBtn" class="btn-ghost">Stop Tracker</button>
+          </div>
+        </div>
+        <div id="trackerStatus" class="meta">Loading tracker status...</div>
+        <div id="sourcesPanel" class="sources-grid">
+          <p class="muted">Loading source status...</p>
+        </div>
+      </section>
+
+      <section id="result" class="panel result-panel">
+        <p class="muted">Run a search to show results.</p>
+      </section>
+    </main>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>

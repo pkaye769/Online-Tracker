@@ -1,0 +1,10 @@
+﻿services:
+  - type: web
+    name: tibia-alt-dashboard
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 10000
