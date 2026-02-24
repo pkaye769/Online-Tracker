@@ -55,6 +55,30 @@ const commands = [
       .setRequired(true)
     ),
   new SlashCommandBuilder()
+    .setName("character")
+    .setDescription("Show character profile")
+    .addStringOption((option) => option
+      .setName("name")
+      .setDescription("Character name")
+      .setRequired(true)
+    ),
+  new SlashCommandBuilder()
+    .setName("online")
+    .setDescription("Check if a character is online (tracker)")
+    .addStringOption((option) => option
+      .setName("name")
+      .setDescription("Character name")
+      .setRequired(true)
+    ),
+  new SlashCommandBuilder()
+    .setName("alts")
+    .setDescription("Raw tracker alternates (no scoring)")
+    .addStringOption((option) => option
+      .setName("character")
+      .setDescription("Character name")
+      .setRequired(true)
+    ),
+  new SlashCommandBuilder()
     .setName("tracker-status")
     .setDescription("Show tracker status"),
   new SlashCommandBuilder()
@@ -269,6 +293,79 @@ client.on("interactionCreate", async (interaction) => {
         );
 
       await interaction.editReply({ embeds: [embed] });
+    }
+
+    if (interaction.commandName === "character") {
+      const name = interaction.options.getString("name", true);
+      const { ok, data } = await fetchJson(`${apiBaseUrl}/api/character?name=${encodeURIComponent(name)}`);
+      if (!ok) {
+        await interaction.editReply("API request failed. Make sure the web server is running.");
+        return;
+      }
+      if (!data?.found) {
+        await interaction.editReply(`No profile found for **${name}**.`);
+        return;
+      }
+
+      const c = data.character || {};
+      const extra = data.extra || {};
+      const emoji = vocationEmoji(c.vocation);
+      const title = `${emoji ? `${emoji} ` : ""}${c.name || name}`;
+      const embed = themedEmbed("Character Profile")
+        .setDescription(`**${title}** (${c.world || "?"})`)
+        .addFields(
+          { name: "Level", value: String(c.level ?? 0), inline: true },
+          { name: "Vocation", value: String(c.vocation || "Unknown"), inline: true },
+          { name: "Guild", value: String(c.guild || "None"), inline: true },
+          { name: "Last Login", value: String(c.lastLogin || "N/A"), inline: true },
+          { name: "Houses", value: String(extra.houses ?? 0), inline: true },
+          { name: "Deaths", value: String(extra.deaths ?? 0), inline: true },
+          { name: "Hunting Exp", value: String(extra.huntingExp ?? 0), inline: true },
+          { name: "Source", value: String(c.source || "unknown"), inline: true }
+        );
+
+      await interaction.editReply({ embeds: [embed] });
+      return;
+    }
+
+    if (interaction.commandName === "online") {
+      const name = interaction.options.getString("name", true);
+      const { ok, data } = await fetchJson(`${apiBaseUrl}/api/online?name=${encodeURIComponent(name)}`);
+      if (!ok) {
+        await interaction.editReply("API request failed. Make sure the web server is running.");
+        return;
+      }
+      if (!data?.found) {
+        await interaction.editReply(`No tracker data for **${name}** yet.`);
+        return;
+      }
+
+      const embed = themedEmbed("Online Status")
+        .setDescription(`**${name}** is **${data.online ? "ONLINE" : "OFFLINE"}**`)
+        .addFields(
+          { name: "Last Seen", value: String(data.lastSeenAt || "N/A"), inline: true },
+          { name: "Last Event", value: String(data.lastEvent?.type || "N/A"), inline: true }
+        );
+      await interaction.editReply({ embeds: [embed] });
+      return;
+    }
+
+    if (interaction.commandName === "alts") {
+      const character = interaction.options.getString("character", true);
+      const { ok, data } = await fetchJson(`${apiBaseUrl}/api/tracker/alternates?character=${encodeURIComponent(character)}&windowSeconds=120&minPairs=1&includeClashes=true`);
+      if (!ok) {
+        await interaction.editReply("API request failed. Make sure the web server is running.");
+        return;
+      }
+
+      const candidates = Array.isArray(data?.candidates) ? data.candidates.slice(0, 8) : [];
+      const lines = candidates.map((c) => `${c.name} (${c.world || "?"}) | adj:${c.adjacencies ?? 0} clash:${c.clashes ?? 0} logins:${c.logins ?? 0}`);
+
+      const embed = themedEmbed("Raw Tracker Alternates")
+        .setDescription(`Seed: **${character}**`)
+        .addFields({ name: "Results", value: lines.length ? `\`\`\`\n${lines.join("\n")}\n\`\`\`` : "No matches." });
+      await interaction.editReply({ embeds: [embed] });
+      return;
     }
 
     if (interaction.commandName === "tracker-status") {

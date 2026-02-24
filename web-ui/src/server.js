@@ -4,9 +4,10 @@ import cors from "cors";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { lookupAltCandidates, lookupGuild, lookupTraded } from "./services/search-service.js";
-import { getSourceStatus } from "./services/providers.js";
+import { getCharacterProfile, getExtraCharacterSignals, getSourceStatus } from "./services/providers.js";
 import {
   getAdjacencyAltCandidates,
+  getOnlineStatus,
   getTrackerStatus,
   startOnlineTracker,
   stopOnlineTracker
@@ -56,6 +57,35 @@ app.get("/api/search/traded", async (req, res) => {
 
   const result = await lookupTraded(character);
   return res.json(result);
+});
+
+app.get("/api/character", async (req, res) => {
+  const name = String(req.query.name || "").trim();
+  if (!name) {
+    return res.status(400).json({ error: "Missing query parameter: name" });
+  }
+
+  const profile = await getCharacterProfile(name);
+  if (!profile) {
+    return res.status(404).json({ found: false, message: "Character not found." });
+  }
+
+  const extra = await getExtraCharacterSignals(profile.name);
+  return res.json({
+    found: true,
+    character: profile,
+    extra
+  });
+});
+
+app.get("/api/online", async (req, res) => {
+  const name = String(req.query.name || "").trim();
+  if (!name) {
+    return res.status(400).json({ error: "Missing query parameter: name" });
+  }
+
+  const status = await getOnlineStatus(name);
+  return res.json({ query: name, ...status });
 });
 
 app.get("/api/sources", async (_req, res) => {

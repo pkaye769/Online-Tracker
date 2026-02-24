@@ -294,6 +294,29 @@ export async function getTrackedCharacters() {
   return Object.values(store.characters || {});
 }
 
+export async function getOnlineStatus(characterName) {
+  const store = await ensureStore();
+  const key = normalize(characterName);
+  const rec = store.characters?.[key];
+  if (!rec) {
+    return { found: false, online: false, lastSeenAt: null, lastEvent: null };
+  }
+
+  const events = Array.isArray(rec.events) ? rec.events : [];
+  const lastEvent = events.length ? events[events.length - 1] : null;
+
+  const sessions = Array.isArray(rec.sessions) ? rec.sessions : [];
+  const lastSession = sessions.length ? sessions[sessions.length - 1] : null;
+  const online = Boolean(lastSession && lastSession.loginAt && !lastSession.logoutAt);
+
+  return {
+    found: true,
+    online,
+    lastSeenAt: rec.lastSeenAt || null,
+    lastEvent
+  };
+}
+
 function ts(value) {
   const n = new Date(value).getTime();
   return Number.isNaN(n) ? 0 : n;
