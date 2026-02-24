@@ -49,10 +49,7 @@ services:
       - key: NODE_VERSION
         value: "20"
       - key: API_BASE_URL
-        fromService:
-          type: web
-          name: online-tracker-web
-          property: url
+        value: "https://REPLACE_ME_WITH_WEB_SERVICE_URL"
       - key: BOT_REQUEST_TIMEOUT_MS
         value: "20000"
       - key: EMBED_THUMBNAIL_URL
