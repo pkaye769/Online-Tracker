@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, MessageFlags, EmbedBuilder } from "discord.js";
+import http from "node:http";
 
 const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.DISCORD_CLIENT_ID;
@@ -9,6 +10,7 @@ const themeGold = 0xbc9148;
 const REQUEST_TIMEOUT_MS = Number(process.env.BOT_REQUEST_TIMEOUT_MS || 8000);
 const EMBED_THUMBNAIL_URL = process.env.EMBED_THUMBNAIL_URL || "https://via.placeholder.com/192x192.png?text=Tibia";
 const EMBED_BANNER_URL = process.env.EMBED_BANNER_URL || "https://via.placeholder.com/800x200.png?text=Alt+Tracker";
+const PORT = Number(process.env.PORT || 3000);
 
 if (!token || !clientId || !guildId) {
   console.error("Missing DISCORD_TOKEN / DISCORD_CLIENT_ID / DISCORD_GUILD_ID in environment.");
@@ -91,6 +93,17 @@ function themedEmbed(title) {
     .setTimestamp();
 }
 
+function startHealthServer() {
+  const server = http.createServer((_req, res) => {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(JSON.stringify({ ok: true, service: "online-tracker-bot" }));
+  });
+
+  server.listen(PORT, () => {
+    console.log(`Bot health server listening on port ${PORT}`);
+  });
+}
+
 async function fetchJson(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -107,6 +120,7 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once("clientReady", () => {
   console.log(`Logged in as ${client.user.tag}`);
+  startHealthServer();
 });
 
 client.on("interactionCreate", async (interaction) => {
