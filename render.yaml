@@ -3,8 +3,9 @@ services:
     name: online-tracker-web
     runtime: node
     plan: free
-    buildCommand: cd web-ui && npm install
-    startCommand: node web-ui/src/server.js
+    rootDir: web-ui
+    buildCommand: npm install
+    startCommand: node src/server.js
     envVars:
       - key: NODE_VERSION
         value: "20"
@@ -38,21 +39,3 @@ services:
         value: "https://www.tibia.com/community/?subtopic=characters&name={name}"
       - key: GUILDSTATS_EXP_URL_TEMPLATE
         value: "https://guildstats.eu/character?nick={name}&tab=9"
-
-  - type: worker
-    name: online-tracker-bot
-    runtime: node
-    plan: free
-    buildCommand: cd web-ui && npm install
-    startCommand: node web-ui/bot/discord-bot.js
-    envVars:
-      - key: NODE_VERSION
-        value: "20"
-      - key: API_BASE_URL
-        value: "https://REPLACE_ME_WITH_WEB_SERVICE_URL"
-      - key: BOT_REQUEST_TIMEOUT_MS
-        value: "20000"
-      - key: EMBED_THUMBNAIL_URL
-        value: "https://via.placeholder.com/192x192.png?text=Tibia"
-      - key: EMBED_BANNER_URL
-        value: "https://via.placeholder.com/800x200.png?text=Alt+Tracker"
