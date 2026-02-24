@@ -116,11 +116,12 @@ async function fetchJson(url) {
   }
 }
 
+startHealthServer();
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 client.once("clientReady", () => {
   console.log(`Logged in as ${client.user.tag}`);
-  startHealthServer();
 });
 
 client.on("interactionCreate", async (interaction) => {
