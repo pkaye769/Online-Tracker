@@ -2,9 +2,6 @@ import "dotenv/config";
 import { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, MessageFlags, EmbedBuilder } from "discord.js";
 import http from "node:http";
 
-const token = process.env.DISCORD_TOKEN;
-const clientId = process.env.DISCORD_CLIENT_ID;
-const guildId = process.env.DISCORD_GUILD_ID;
 const apiBaseUrl = process.env.API_BASE_URL || "http://127.0.0.1:3000";
 const themeGold = 0xbc9148;
 const REQUEST_TIMEOUT_MS = Number(process.env.BOT_REQUEST_TIMEOUT_MS || 8000);
@@ -12,10 +9,9 @@ const EMBED_THUMBNAIL_URL = process.env.EMBED_THUMBNAIL_URL || "https://via.plac
 const EMBED_BANNER_URL = process.env.EMBED_BANNER_URL || "https://via.placeholder.com/800x200.png?text=Alt+Tracker";
 const PORT = Number(process.env.PORT || 3000);
 
-if (!token || !clientId || !guildId) {
-  console.error("Missing DISCORD_TOKEN / DISCORD_CLIENT_ID / DISCORD_GUILD_ID in environment.");
-  process.exit(1);
-}
+const token = process.env.DISCORD_TOKEN;
+const clientId = process.env.DISCORD_CLIENT_ID;
+const guildId = process.env.DISCORD_GUILD_ID;
 
 const commands = [
   new SlashCommandBuilder()
@@ -99,7 +95,7 @@ function startHealthServer() {
     res.end(JSON.stringify({ ok: true, service: "online-tracker-bot" }));
   });
 
-  server.listen(PORT, () => {
+  server.listen(PORT, "0.0.0.0", () => {
     console.log(`Bot health server listening on port ${PORT}`);
   });
 }
@@ -117,6 +113,10 @@ async function fetchJson(url) {
 }
 
 startHealthServer();
+
+if (!token || !clientId || !guildId) {
+  console.error("Missing DISCORD_TOKEN / DISCORD_CLIENT_ID / DISCORD_GUILD_ID in environment.");
+}
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -272,9 +272,11 @@ client.on("interactionCreate", async (interaction) => {
   }
 });
 
-registerCommands()
-  .then(() => client.login(token))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+if (token && clientId && guildId) {
+  registerCommands()
+    .then(() => client.login(token))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}
