@@ -39,3 +39,22 @@ services:
         value: "https://www.tibia.com/community/?subtopic=characters&name={name}"
       - key: GUILDSTATS_EXP_URL_TEMPLATE
         value: "https://guildstats.eu/character?nick={name}&tab=9"
+
+  - type: web
+    name: online-tracker-bot
+    runtime: node
+    plan: free
+    rootDir: web-ui
+    buildCommand: npm install
+    startCommand: node bot/discord-bot.js
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: API_BASE_URL
+        value: "https://online-tracker-web.onrender.com"
+      - key: BOT_REQUEST_TIMEOUT_MS
+        value: "20000"
+      - key: EMBED_THUMBNAIL_URL
+        value: "https://via.placeholder.com/192x192.png?text=Tibia"
+      - key: EMBED_BANNER_URL
+        value: "https://via.placeholder.com/800x200.png?text=Alt+Tracker"
