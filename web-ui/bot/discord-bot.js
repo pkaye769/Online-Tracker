@@ -53,7 +53,19 @@ const commands = [
       .setName("character")
       .setDescription("Character name")
       .setRequired(true)
-    )
+    ),
+  new SlashCommandBuilder()
+    .setName("tracker-status")
+    .setDescription("Show tracker status"),
+  new SlashCommandBuilder()
+    .setName("tracker-start")
+    .setDescription("Start the online tracker"),
+  new SlashCommandBuilder()
+    .setName("tracker-stop")
+    .setDescription("Stop the online tracker"),
+  new SlashCommandBuilder()
+    .setName("sources")
+    .setDescription("Show live source health")
 ].map((cmd) => cmd.toJSON());
 
 async function registerCommands() {
@@ -100,11 +112,11 @@ function startHealthServer() {
   });
 }
 
-async function fetchJson(url) {
+async function fetchJson(url, options = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, { ...options, signal: controller.signal });
     const data = await res.json().catch(() => ({}));
     return { ok: res.ok, data };
   } finally {
@@ -257,6 +269,84 @@ client.on("interactionCreate", async (interaction) => {
         );
 
       await interaction.editReply({ embeds: [embed] });
+    }
+
+    if (interaction.commandName === "tracker-status") {
+      const { ok, data } = await fetchJson(`${apiBaseUrl}/api/tracker/status`);
+      if (!ok) {
+        await interaction.editReply("API request failed. Make sure the web server is running.");
+        return;
+      }
+
+      const embed = themedEmbed("Tracker Status")
+        .setDescription(`Running: **${Boolean(data?.running)}**`)
+        .addFields(
+          { name: "Worlds", value: String((data?.worlds || []).join(", ") || "N/A"), inline: true },
+          { name: "Interval", value: `${data?.intervalMs ?? "?"} ms`, inline: true },
+          { name: "Last Poll", value: String(data?.lastPollAt || "N/A"), inline: true },
+          { name: "Poll Count", value: String(data?.pollCount ?? 0), inline: true },
+          { name: "Errors", value: String(data?.errors ?? 0), inline: true }
+        );
+
+      await interaction.editReply({ embeds: [embed] });
+      return;
+    }
+
+    if (interaction.commandName === "tracker-start") {
+      const { ok, data } = await fetchJson(`${apiBaseUrl}/api/tracker/start`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({})
+      });
+      if (!ok) {
+        await interaction.editReply("API request failed. Make sure the web server is running.");
+        return;
+      }
+      const embed = themedEmbed("Tracker Started")
+        .setDescription(`Running: **${Boolean(data?.running)}**`)
+        .addFields(
+          { name: "Worlds", value: String((data?.worlds || []).join(", ") || "N/A"), inline: true },
+          { name: "Interval", value: `${data?.intervalMs ?? "?"} ms`, inline: true }
+        );
+      await interaction.editReply({ embeds: [embed] });
+      return;
+    }
+
+    if (interaction.commandName === "tracker-stop") {
+      const { ok, data } = await fetchJson(`${apiBaseUrl}/api/tracker/stop`, { method: "POST" });
+      if (!ok) {
+        await interaction.editReply("API request failed. Make sure the web server is running.");
+        return;
+      }
+      const embed = themedEmbed("Tracker Stopped")
+        .setDescription(`Running: **${Boolean(data?.running)}**`)
+        .addFields(
+          { name: "Worlds", value: String((data?.worlds || []).join(", ") || "N/A"), inline: true },
+          { name: "Interval", value: `${data?.intervalMs ?? "?"} ms`, inline: true }
+        );
+      await interaction.editReply({ embeds: [embed] });
+      return;
+    }
+
+    if (interaction.commandName === "sources") {
+      const { ok, data } = await fetchJson(`${apiBaseUrl}/api/sources`);
+      if (!ok) {
+        await interaction.editReply("API request failed. Make sure the web server is running.");
+        return;
+      }
+      const sources = Array.isArray(data?.sources) ? data.sources : [];
+      const lines = sources.map((s) => {
+        const detail = s.details
+          ? Object.entries(s.details).map(([k, v]) => `${k}:${v}`).join(" | ")
+          : (s.error || "no details");
+        return `${s.name}: ${s.status} (${s.latencyMs ?? "?"}ms) ${detail}`;
+      });
+
+      const embed = themedEmbed("Source Health")
+        .setDescription(`Checked: ${String(data?.checkedAt || "N/A")}`)
+        .addFields({ name: "Sources", value: lines.length ? `\`\`\`\n${lines.join("\n")}\n\`\`\`` : "No source data." });
+      await interaction.editReply({ embeds: [embed] });
+      return;
     }
   } catch (error) {
     console.error(`Request to ${apiBaseUrl} failed`, error);
